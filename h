@@ -41,13 +41,24 @@ opts.secretOrKey =config.secretKey
     })) 
    
     exports.verifyUser =passport.authenticate('jwt',{session:false})       
-               
-    exports.verifyAdmin = (req,res,next)=>{
-        if(req.user.admin)
-            next();
-        else{
-            var err=new Error('You are not authorized to perform this operation!');
-            err.status=403;
-            return next(err);
-        }
-    };
+    
+
+    exports.jwtPassport=passport.use(new JwtStrategy(opts,
+        (jwt_Payload, done)=>{
+            console.log('JWT payload',jwt_Payload)
+            User.findOne({_id:jwt_Payload._id},(err,user)=>{
+                if(err){
+                    return done(err,false)
+                }
+                else if (user.admin){
+                    return done(null,user)
+                }
+                else{
+                    return done(null,false)
+                }
+            })
+        })) 
+                     
+    exports.verifyadmin =passport.authenticate('local',{session:false})
+
+

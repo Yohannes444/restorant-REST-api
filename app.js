@@ -11,9 +11,9 @@ var config=require('./config')
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var dishRouter = require('./routes/dishRouter')
-var promoRouter= require('./routes/promoRouter ')
-var leaderRouter= require('./routes/leaderRouter')
+var dishRouter = require('./routes/dishRouter');
+var promoRouter= require('./routes/promoRouter ');
+var leaderRouter= require('./routes/leaderRouter');
 
 const mongoose = require('mongoose');
 const Dishes= require('./models/dishes')
@@ -24,6 +24,13 @@ connect.then((db) => {
 },(err)=>{console.log(err)}
 )
 var app = express();
+app.all('*',(req,res,next)=>{
+  if(req.secure){
+    return next()
+  }else(
+    res.redirect(307,'https://'+ req.hostname+ ':'+app.get('secPort')+req.url)
+  )
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
