@@ -4,9 +4,10 @@ var user =require('../models//user')
 var authenticate=require('../authenticate')
 var passport=require('passport');
 var router = express.Router();
+var cors=require('./cors')
 router.use(bodyParser.json())
 /* GET users listing. */
-router.get('/',authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next) => {
+router.get('/',cors.corsWithOptions, authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next) => {
   user.find({})
   .then((users) => {
       res.statusCode = 200;
@@ -16,7 +17,7 @@ router.get('/',authenticate.verifyUser,authenticate.verifyAdmin,(req,res,next) =
   .catch((err) => next(err));
 });
 
-router.post('/signup', (req, res,next) => {
+router.post('/signup',cors.corsWithOptions, (req, res,next) => {
   user.register(new user({username: req.body.username}),
   req.body.password,(err,user) => {
     if(err) {
@@ -50,7 +51,7 @@ router.post('/signup', (req, res,next) => {
 
 });
 
-router.post('/login',passport.authenticate('local'), (req,res,next) => {
+router.post('/login',cors.corsWithOptions, passport.authenticate('local'), (req,res,next) => {
   var token =authenticate.getToken({_id:req.user._id})
   res.statusCode = 200;
   res.setHeader('Content-Type', 'application/json');
@@ -58,7 +59,7 @@ router.post('/login',passport.authenticate('local'), (req,res,next) => {
   next()
 })
 
-router.get('/logout', (req, res,next) => {
+router.get('/logout',cors.corsWithOptions, (req, res,next) => {
   if (req.session) {
     req.session.destroy();
     res.clearCookie('session-id');
@@ -70,5 +71,13 @@ router.get('/logout', (req, res,next) => {
     next(err)
   }
 });
+router.get('/facebook/token',passport.authenticate('facebook-token'),(req,res)=>{
+  if(req.user){
+    var token =authenticate.getToken({_id:req.user._id})
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.json({success:true ,token:token  ,status: 'your are successfuly logdin',});
+  }
+})
 
 module.exports = router;
