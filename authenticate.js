@@ -23,7 +23,7 @@ exports.getToken= function(user){
 }
 
 const opts = {
-    secretOrKey: config.secretKey, // replace with your actual secret or key
+    secretOrKey: config.secretKey, 
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken()
   };
 
